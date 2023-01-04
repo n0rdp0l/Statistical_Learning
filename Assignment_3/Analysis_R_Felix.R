@@ -9,6 +9,7 @@ library(glmnet)
 library(fastDummies)
 library(caret)
 library(factoextra)
+library(readr)
 
 # loading data 
 train <- read.csv("data/train.csv", stringsAsFactors = F)
@@ -273,10 +274,11 @@ model <- lm(Y ~ ., data = data.frame(pcs, Y = y_train_scale))
 
 
 # lasso
-Id <- as.numeric(row.names(SalePrice_Lasso2))
-to_csv <- data.frame(Id, SalePrice_Lasso2)
+SalePrice <- SalePrice_Lasso2
+Id <- test_labels
+to_csv <- data.frame(Id, SalePrice)
 colnames(to_csv) <- c("Id","SalePrice")
-write.csv(to_csv, 'lasso_submission.csv')
+write_csv(to_csv, 'lasso_submission.csv')
 
 
 
