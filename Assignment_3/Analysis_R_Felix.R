@@ -243,7 +243,7 @@ SalePrice_Lasso2 <- predict(lasso_model, newx = as.matrix(X_test_scale)) * sd(tr
 #PCR
 set.seed(3337731)
 model_pcr <- train(SalePrice ~ ., data = train_scale, method = "pcr", scale = F,
-                   trControl = trainControl("cv", number = 10), tuneLength = 150)
+                   trControl = trainControl("cv", number = 10), tuneLength = 16)
 
 model_pcr$bestTune
 
@@ -286,4 +286,4 @@ SalePrice <- SalePrice_PCR2
 Id <- test_labels
 to_csv <- data.frame(Id, SalePrice)
 colnames(to_csv) <- c("Id","SalePrice")
-write_csv(to_csv, 'pcr_submission.csv')
+write_csv(to_csv, 'pcr_submission_kaiser.csv')
