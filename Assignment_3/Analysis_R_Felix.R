@@ -246,6 +246,27 @@ head(sorted_coefs)
 
 
 
+unscaled_coefs <- function(coefs, X_train_scale, y_train_scale) {
+  # Extract the standard deviation of each predictor
+  sd_x <- apply(X_train_scale, 2, sd)
+  
+  # Extract the standard deviation of the response
+  sd_y <- sd(y_train_scale)
+  
+  # Un-standardize the coefficients
+  unscaled_coefs <- coefs * sd_x * sd_y
+  
+  return(unscaled_coefs)
+}
+
+# Un-standardize the coefficients
+unscaled_coefs <- unscaled_coefs(coefs, X_train_scale, y_train_scale)
+
+# Show the un-standardized coefficients
+unscaled_coefs
+
+
+
 
 # predict
 SalePrice_Lasso <- predict(lasso_model, newx = as.matrix(X_test_scale))
