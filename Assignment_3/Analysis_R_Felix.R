@@ -233,7 +233,7 @@ plot(lasso_viz, xvar = "lambda")
 
 # create model with optimal lambda to predict values 
 lasso_model = glmnet( as.matrix(X_train_scale), y_train_scale, alpha=1 ,
-                      lambda=lasso_cv$lambda.min)
+                      lambda=lasso_cv$lambda.1se)
 
 summary(lasso_cv)
 
@@ -246,13 +246,14 @@ SalePrice_Lasso2 <- predict(lasso_model, newx = as.matrix(X_test_scale)) * sd(tr
 #PCR
 set.seed(3337731)
 model_pcr <- train(SalePrice ~ ., data = train_scale, method = "pcr", scale = F,
-                   trControl = trainControl("cv", number = 10), tuneLength = 16)
+                   trControl = trainControl("cv", number = 10), tuneLength = 170 )
 
 model_pcr$bestTune
 
 plot(model_pcr)
 
-summary(model_pcr$finalModel)
+summary(model_pcr)
+coef(model_pcr)
 
 #predict
 SalePrice_PCR <- predict(model_pcr, X_test_scale)
