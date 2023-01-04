@@ -233,9 +233,19 @@ plot(lasso_viz, xvar = "lambda")
 
 # create model with optimal lambda to predict values 
 lasso_model = glmnet( as.matrix(X_train_scale), y_train_scale, alpha=1 ,
-                      lambda=lasso_cv$lambda.1se)
+                      lambda=lasso_cv$lambda.min)
 
-summary(lasso_cv)
+# Extract the coefficients from the model
+coefs <- coef(lasso_model)
+
+# Sort the coefficients in descending order
+sorted_coefs <- sort(coefs, decreasing = TRUE)
+
+# Show the largest coefficients
+head(sorted_coefs)
+
+
+
 
 # predict
 SalePrice_Lasso <- predict(lasso_model, newx = as.matrix(X_test_scale))
