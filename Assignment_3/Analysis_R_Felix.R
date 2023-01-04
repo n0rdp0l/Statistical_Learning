@@ -10,6 +10,9 @@ library(fastDummies)
 library(caret)
 library(factoextra)
 library(readr)
+library(parallel)
+library(doParallel)
+library(xgboost)
 
 # loading data 
 train <- read.csv("data/train.csv", stringsAsFactors = F)
@@ -269,6 +272,52 @@ pcs <- predict(pca, newdata = X_train_scale)[, 1:num_pcs]
 model <- lm(Y ~ ., data = data.frame(pcs, Y = y_train_scale))
 
 
+# XGBoost
+cluster <- makeCluster(detectCores() - 2) 
+registerDoParallel(cluster)
+
+fitControl <- trainControl(method = "cv",
+                           number = 10,
+                           allowParallel = TRUE)
+
+
+xgb_grid = expand.grid(
+  nrounds = 1000,
+  eta = c(0.1, 0.05, 0.01),
+  max_depth = c(2, 3, 4, 5, 6),
+  gamma = 0,
+  colsample_bytree=1,
+  min_child_weight=c(1, 2, 3, 4 ,5),
+  subsample=1
+)
+
+xgb_caret <- train(x=X_train, y=y_train, method='xgbTree', trControl= fitControl, tuneGrid=xgb_grid) 
+xgb_caret$bestTune
+
+
+# put our testing & training data into two seperates Dmatrixs objects
+dtrain <- xgb.DMatrix(as.matrix(X_train_scale), label = y_train_scale)
+dtest <- xgb.DMatrix(as.matrix(X_test_scale))
+
+xgb_params <- list(
+  booster = 'gbtree',
+  objective = 'reg:linear',
+  colsample_bytree=1,
+  eta=0.05,
+  max_depth=4,
+  min_child_weight=3,
+  alpha=0.3,
+  lambda=0.4,
+  gamma=0.01, # less overfit
+  subsample=0.6,
+  seed=5,
+  silent=TRUE)
+
+xgbcv <- xgb.cv(xgb_params, dtrain, nrounds = 5000, nfold = 4, early_stopping_rounds = 500)
+#train the model using the best iteration found by cross validation
+xgb_mod <- xgb.train(data = dtrain, params=default_param, nrounds = 454)
+
+XGBpred <- predict(xgb_mod, dtest) * sd(train$SalePrice) + mean(train$SalePrice)
 
 ### submissions
 
@@ -287,3 +336,11 @@ Id <- test_labels
 to_csv <- data.frame(Id, SalePrice)
 colnames(to_csv) <- c("Id","SalePrice")
 write_csv(to_csv, 'pcr_submission_kaiser.csv')
+
+# xgbboost
+
+SalePrice <- XGBpred
+Id <- test_labels
+to_csv <- data.frame(Id, SalePrice)
+colnames(to_csv) <- c("Id","SalePrice")
+write_csv(to_csv, 'XGB_submission.csv')
