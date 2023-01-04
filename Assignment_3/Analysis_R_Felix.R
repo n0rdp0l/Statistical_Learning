@@ -280,5 +280,10 @@ to_csv <- data.frame(Id, SalePrice)
 colnames(to_csv) <- c("Id","SalePrice")
 write_csv(to_csv, 'lasso_submission.csv')
 
+# pcr
 
-
+SalePrice <- SalePrice_PCR2
+Id <- test_labels
+to_csv <- data.frame(Id, SalePrice)
+colnames(to_csv) <- c("Id","SalePrice")
+write_csv(to_csv, 'pcr_submission.csv')
