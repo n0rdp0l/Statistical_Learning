@@ -13,6 +13,7 @@ library(readr)
 library(parallel)
 library(doParallel)
 library(xgboost)
+library(Ckmeans.1d.dp)
 
 # loading data 
 train <- read.csv("data/train.csv", stringsAsFactors = F)
@@ -245,27 +246,10 @@ sorted_coefs <- sort(coefs, decreasing = TRUE)
 head(sorted_coefs)
 
 
+sorted_coefs 
 
-unscaled_coefs <- function(coefs, X_train_scale, y_train_scale) {
-  # Extract the standard deviation of each predictor
-  sd_x <- apply(X_train_scale, 2, sd)
-  
-  # Extract the standard deviation of the response
-  sd_y <- sd(y_train_scale)
-  
-  # Un-standardize the coefficients
-  unscaled_coefs <- coefs * sd_x * sd_y
-  
-  return(unscaled_coefs)
-}
-
-# Un-standardize the coefficients
-unscaled_coefs <- unscaled_coefs(coefs, X_train_scale, y_train_scale)
-
-# Show the un-standardized coefficients
-unscaled_coefs
-
-
+sd(train$OverallQual)* sd(train$SalePrice)*coefs
+sd(train$GrLivArea)* sd(train$SalePrice)*coefs
 
 
 # predict
@@ -350,6 +334,10 @@ xgbcv <- xgb.cv(xgb_params, dtrain, nrounds = 5000, nfold = 4, early_stopping_ro
 xgb_mod <- xgb.train(data = dtrain, params=default_param, nrounds = 454)
 
 XGBpred <- predict(xgb_mod, dtest) * sd(train$SalePrice) + mean(train$SalePrice)
+
+ 
+mat <- xgb.importance (feature_names = colnames(X_train_scale),model = xgb_mod)
+xgb.ggplot.importance(importance_matrix = mat[1:20], rel_to_first = F)
 
 ### submissions
 
