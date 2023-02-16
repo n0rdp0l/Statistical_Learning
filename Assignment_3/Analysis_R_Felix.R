@@ -223,6 +223,7 @@ ggcorrplot(var_num_cor, hc.order = TRUE,
 
 
 # Lasso
+set.seed(3337731)
 lasso_cv = cv.glmnet(as.matrix(X_train_scale)  , y_train_scale , alpha=1) 
 
 plot(lasso_cv, type="b", bty ="l")
@@ -236,9 +237,11 @@ plot(lasso_viz, xvar = "lambda")
 lasso_model = glmnet( as.matrix(X_train_scale), y_train_scale, alpha=1 ,
                       lambda=lasso_cv$lambda.min)
 
+log(lasso_cv$lambda.min)
+
 # Extract the coefficients from the model
 coefs <- coef(lasso_model)
-
+sum(coefs != 0)
 # Sort the coefficients in descending order
 sorted_coefs <- sort(coefs, decreasing = TRUE)
 
